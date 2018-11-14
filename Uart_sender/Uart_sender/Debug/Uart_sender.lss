@@ -129,19 +129,19 @@ void init_usart (void)
   ee:	87 e6       	ldi	r24, 0x67	; 103
   f0:	80 93 cc 00 	sts	0x00CC, r24	; 0x8000cc <__TEXT_REGION_LENGTH__+0x7e00cc>
 	UCSR1B = UCSR1B | (1<<TXEN1);	//Sender ein
-  f4:	e9 ec       	ldi	r30, 0xC9	; 201
-  f6:	f0 e0       	ldi	r31, 0x00	; 0
-  f8:	80 81       	ld	r24, Z
+  f4:	a9 ec       	ldi	r26, 0xC9	; 201
+  f6:	b0 e0       	ldi	r27, 0x00	; 0
+  f8:	8c 91       	ld	r24, X
   fa:	88 60       	ori	r24, 0x08	; 8
-  fc:	80 83       	st	Z, r24
+  fc:	8c 93       	st	X, r24
 	UCSR1B = UCSR1B | (1<<RXEN1);	//empfang ein
-  fe:	80 81       	ld	r24, Z
+  fe:	8c 91       	ld	r24, X
  100:	80 61       	ori	r24, 0x10	; 16
- 102:	80 83       	st	Z, r24
+ 102:	8c 93       	st	X, r24
 	UCSR1B = UCSR1B | (1<<TXCIE1);	//Sende-Interruput ein
- 104:	80 81       	ld	r24, Z
+ 104:	8c 91       	ld	r24, X
  106:	80 64       	ori	r24, 0x40	; 64
- 108:	80 83       	st	Z, r24
+ 108:	8c 93       	st	X, r24
 	//UCSR1B = UCSR1B | (1<<UDRIE1);	//Buffer-Interrupt ein
 	//UCSR1A = UCSR1A | (1<<UDRE1);
 	
@@ -178,10 +178,10 @@ void init_usart (void)
  132:	80 81       	ld	r24, Z
  134:	84 60       	ori	r24, 0x04	; 4
  136:	80 83       	st	Z, r24
-	UCSR1C = UCSR1C &~ (1<<UCSZ12);
- 138:	80 81       	ld	r24, Z
+	UCSR1B = UCSR1B &~ (1<<UCSZ12);
+ 138:	8c 91       	ld	r24, X
  13a:	8b 7f       	andi	r24, 0xFB	; 251
- 13c:	80 83       	st	Z, r24
+ 13c:	8c 93       	st	X, r24
  13e:	08 95       	ret
 
 00000140 <init_transmission_timer>:
@@ -251,13 +251,13 @@ void daten_senden(void)
  188:	e5 e0       	ldi	r30, 0x05	; 5
  18a:	f1 e0       	ldi	r31, 0x01	; 1
  18c:	80 83       	st	Z, r24
-	sende_daten[1] = sende_daten[1] | voltage;
+	sende_daten[1] = sende_daten[1] | voltage;			//LOW-Byte
  18e:	21 81       	ldd	r18, Z+1	; 0x01
  190:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <voltage>
  194:	90 91 02 01 	lds	r25, 0x0102	; 0x800102 <voltage+0x1>
  198:	82 2b       	or	r24, r18
  19a:	81 83       	std	Z+1, r24	; 0x01
-	sende_daten[2] = sende_daten[2] | (voltage>>8);
+	sende_daten[2] = sende_daten[2] | (voltage>>8);		//HIGH-Byte
  19c:	82 81       	ldd	r24, Z+2	; 0x02
  19e:	20 91 01 01 	lds	r18, 0x0101	; 0x800101 <voltage>
  1a2:	30 91 02 01 	lds	r19, 0x0102	; 0x800102 <voltage+0x1>
@@ -315,8 +315,6 @@ ISR(USART1_TX_vect)     //Interrupt für sender //alle  11,75ms -> 8ms pause + 3*
  1ee:	0f b6       	in	r0, 0x3f	; 63
  1f0:	0f 92       	push	r0
  1f2:	11 24       	eor	r1, r1
-	
-	
 	TCNT0 = 0;					//nötig um nicht in de overflow zu geraten
  1f4:	16 bc       	out	0x26, r1	; 38
 	overflow_counter = 0;		//Counter wird auf 0 gesetzt

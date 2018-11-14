@@ -5,9 +5,9 @@
 
 
 char i=0;									//laufvariable für empfangdaten[i]
-volatile unsigned char sende_daten[3];	//dynamischer Speicher der Akkudaten
-volatile uint16_t voltage=0b0110101000011011;	//Akku Spannung	0-3650mV
-volatile uint8_t temperatur=0b01101010;//Temperatur	0-120C
+volatile unsigned char sende_daten[3];			//dynamischer Speicher der Akkudaten
+volatile uint16_t voltage=0b0011001100001111;	//Akku Spannung	0-3650mV
+volatile uint8_t temperatur=0b01010101;			//Temperatur	0-120C
 char overflow_counter=0;	//Zählt Overflows für Pause
 
 void daten_senden(void);
@@ -32,7 +32,7 @@ void init_usart (void)
 	
 	UCSR1C = UCSR1C | (1<<UCSZ10);		//8-Bit data
 	UCSR1C = UCSR1C | (1<<UCSZ11);
-	UCSR1C = UCSR1C &~ (1<<UCSZ12);
+	UCSR1B = UCSR1B &~ (1<<UCSZ12);
 	
 	//UCSR1C = UCSR1C &~ (UCPOL1);		//muss low sein im asynchron mode
 	
@@ -62,8 +62,8 @@ void daten_senden(void)
 	overflow_counter=0;
 	
 	sende_daten[0] = temperatur;
-	sende_daten[1] = sende_daten[1] | voltage;
-	sende_daten[2] = sende_daten[2] | (voltage>>8);
+	sende_daten[1] = sende_daten[1] | voltage;			//LOW-Byte
+	sende_daten[2] = sende_daten[2] | (voltage>>8);		//HIGH-Byte
 	
 	//Funktioniert nicht mit For schleife ???
 
@@ -83,8 +83,6 @@ void daten_senden(void)
 } 
 ISR(USART1_TX_vect)     //Interrupt für sender //alle  11,75ms -> 8ms pause + 3*1,25ms (Data)
 {	
-	
-	
 	TCNT0 = 0;					//nötig um nicht in de overflow zu geraten
 	overflow_counter = 0;		//Counter wird auf 0 gesetzt
 }
